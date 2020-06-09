@@ -5,9 +5,9 @@
 % Project Code: YPAP115
 % Project Title: Path Planning using PSO in MATLAB
 % Publisher: Yarpiz (www.yarpiz.com)
-% 
+%
 % Developer: S. Mostapha Kalami Heris (Member of Yarpiz Team)
-% 
+%
 % Contact Info: sm.kalami@gmail.com, info@yarpiz.com
 %
 
@@ -15,7 +15,7 @@ function sol2=ParseSolution(sol1,model)
 
     x=sol1.x;
     y=sol1.y;
-    
+
     xs=model.xs;
     ys=model.ys;
     xt=model.xt;
@@ -23,21 +23,21 @@ function sol2=ParseSolution(sol1,model)
     xobs=model.xobs;
     yobs=model.yobs;
     robs=model.robs;
-    
+
     XS=[xs x xt];
     YS=[ys y yt];
     k=numel(XS);
     TS=linspace(0,1,k);
-    
-    tt=linspace(0,1,101);    
+
+    tt=linspace(0,1,201);
     xx=spline(TS,XS,tt);
     yy=spline(TS,YS,tt);
-    
+
     dx=diff(xx);
     dy=diff(yy);
-    
+
     L=sum(sqrt(dx.^2+dy.^2));
-    
+
     nobs = numel(xobs); % Number of Obstacles
     Violation = 0;
     for k=1:nobs
@@ -45,7 +45,11 @@ function sol2=ParseSolution(sol1,model)
         v=max(1-d/robs(k),0);
         Violation=Violation+mean(v);
     end
-    
+
+    IsFeasible=(Violation==0 ...
+                & isempty(xx(xx > 50 | xx < -50)) ...
+                & isempty(yy(yy > 50 | yy < -50)));
+
     sol2.TS=TS;
     sol2.XS=XS;
     sol2.YS=YS;
@@ -56,27 +60,27 @@ function sol2=ParseSolution(sol1,model)
     sol2.dy=dy;
     sol2.L=L;
     sol2.Violation=Violation;
-    sol2.IsFeasible=(Violation==0);
-    
+    sol2.IsFeasible=IsFeasible;
+
 %     figure;
 %     plot(xx,yy);
 %     hold on;
 %     plot(XS,YS,'ro');
 %     xlabel('x');
 %     ylabel('y');
-%     
+%
 %     figure;
 %     plot(tt,xx);
 %     hold on;
 %     plot(TS,XS,'ro');
 %     xlabel('t');
 %     ylabel('x');
-%     
+%
 %     figure;
 %     plot(tt,yy);
 %     hold on;
 %     plot(TS,YS,'ro');
 %     xlabel('t');
 %     ylabel('y');
-    
+
 end

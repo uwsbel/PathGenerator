@@ -11,9 +11,10 @@ B3 = t.^3;
 figure
 hold on
 
-pathfiles = dir('path_*.dat');
+folder = 'Data/';
+pathfiles = dir(sprintf('%spath_*.dat', folder));
 for f = 1:length(pathfiles)
-    data = readBezier(pathfiles(f).name);
+    data = readBezier(sprintf("%s%s", folder, pathfiles(f).name));
     for i = 1:data.n-1
         X = B0 * data.p(i,1) + B1 * data.out(i,1) + B2 * data.in(i+1,1) + B3 * data.p(i+1,1);
         Y = B0 * data.p(i,2) + B1 * data.out(i,2) + B2 * data.in(i+1,2) + B3 * data.p(i+1,2);
