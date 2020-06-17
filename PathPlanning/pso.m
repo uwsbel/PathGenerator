@@ -18,7 +18,7 @@ function [sol, model] = pso(verbose)
 
 model=CreateModel(verbose);
 
-model.n=5;  % number of Handle Points
+% model.n=5;  % number of Handle Points
 
 CostFunction=@(x) MyCost(x,model);    % Cost Function
 

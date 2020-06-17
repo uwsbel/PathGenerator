@@ -13,40 +13,40 @@
 
 function model=CreateModel(verbose)
     % Domain
-    xmin = -47;
-    ymin = -47;
-    xmax = 47;
-    ymax = 47;
+    xmin = -46;
+    ymin = -46;
+    xmax = 46;
+    ymax = 46;
 
     % Start
-    xs = -47;
-    ys = -47;
+    xs = -46;
+    ys = -46;
 
     % Target (Destination)
-    xt = 47;
-    yt = 47;
+    xt = 46;
+    yt = 46;
 
     % ---------
     % Obstacles
     % ---------
 
     % Fixed (equally spaced between start and target)
-    nfixed = 0;                         %  CAN BE CHANGED
+    nfixed = 4;                         %  CAN BE CHANGED
     if nfixed
       foo = linspace(xs, xt, nfixed + 2);
       xfixed = foo(2:end-1);
       foo = linspace(ys, yt, nfixed + 2);
       yfixed = foo(2:end-1);
-      rfixed = 6 * ones(1, nfixed);       %  CAN BE CHANGED
+      rfixed = 8 * ones(1, nfixed);       %  CAN BE CHANGED
     end
 
     % Initialize obstacle generation settings
-    S.circSize = [3,4,5];
+    S.circSize = [5,6,7];
     S.frameSize = [85,85];
-	  S.maxIt = 50;
+	S.maxIt = 50;
     S.nSizes = NaN;
     S.supressWarning = ~verbose;
-    S.maxCircsPerRad = 10;
+    S.maxCircsPerRad = 5;
     S.drawScene = false;
     S.overlap = -1;
     if nfixed
@@ -61,10 +61,14 @@ function model=CreateModel(verbose)
     yobs = circData(:,2)';
     robs = circData(:,3)';
 
+    if verbose
+      fprintf('Number of Obstacles: %d.\n', length(xobs))
+    end
+
     % ===================================================================
 
 
-    n = 3;
+    n = 5;
 
     model.xs=xs;
     model.ys=ys;

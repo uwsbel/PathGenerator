@@ -1,5 +1,5 @@
 
-num_trials = 500;
+num_trials = 750;
 verbose = false;
 render = false;
 save = true;
@@ -16,7 +16,7 @@ addpath(genpath('Obstacles/'));
 % ----------------
 
 boolString = {'false', 'true'};
-idx = 0;
+idx = 1;
 for it = 1:num_trials
 
     % Generate optimal path for random obstacles
@@ -50,15 +50,17 @@ for it = 1:num_trials
     end
 
     % TODO:  a more precise feasability test?
-    
+
     if ~feasible
         continue;
     end
 
     if save
         % Write files for this trial
-        folder = "Data/";
-        idx = idx + 1;
+        folder = "Data/Paths/";
+        while isfile(sprintf('%spath_%d.dat', folder, idx))
+            idx = idx + 1;
+        end
 
         % Path points
         fp = fopen(sprintf('%spoints_%d.dat', folder, idx), 'w');
@@ -76,6 +78,8 @@ for it = 1:num_trials
 
         % Bezier curve
         writeBezier(data, sprintf('%spath_%d.dat', folder, idx));
+
+        fprintf('Figure #%d saved.\n', idx);
     end
 
 end

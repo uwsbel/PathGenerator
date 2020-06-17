@@ -1,4 +1,4 @@
-function [mPath, mSpeed, path_length] = metrics(lfile, ffile, varargin)
+function [mPath, mSpeed, path_length] = metrics(lfile, ffile, plotit)
 % Calculate metrics for follower path deviation.
 % Usage:
 %   [avg_dev, max_dev, path_length] = metrics(lfile, ffile)
@@ -6,7 +6,6 @@ function [mPath, mSpeed, path_length] = metrics(lfile, ffile, varargin)
 % Inputs:
 %   lfile - filename (csv) with leader's path data
 %   ffile - filename (csv) with follower's path data
-%   timeit - if true, report timing information
 %   plotit - if true, plot intermediate results
 % Input files are assumed to have x-y coordinates in 2nd and 3rd column.
 % Outputs:
@@ -18,19 +17,29 @@ function [mPath, mSpeed, path_length] = metrics(lfile, ffile, varargin)
 %     mSpeed.max - maximum deviation
 %   path_length - length of leader path (only portion used in calculations)
 
-if nargin > 2
-    plotit = varargin{1};
-else
-    plotit = false;
-end
-
 addpath(genpath('SampleCurve/'));
 
 tstart_total = tic;
 
 % Load data for leader and follower
-ldata=csvread(lfile,1,0);
-fdata=csvread(ffile,1,0);
+ldata=importdata(lfile);
+if isstruct(ldata)
+    % if file has a header, just get the data
+    ldata = ldata.data;
+else
+    % if file doesn't have a header, there is a column that is only its rank
+    % remove it
+    ldata(:,1) = [];
+end
+fdata=importdata(ffile);
+if isstruct(fdata)
+    % if file has a header, just get the data
+    fdata = fdata.data;
+else
+    % if file doesn't have a header, there is a column that is only its rank
+    % remove it
+    fdata(:,1) = [];
+end
 
 % Leader and follower paths (x-y)
 % (Eliminate duplicates else spline complains)
@@ -68,7 +77,7 @@ clear fidx lidx
 %%fprintf('leader path length = %f\n', path_length);
 
 % Evaluate the leader path at 'n' equally spaced points in arclength
-n = min(200, size(lpathC,1));
+n = min(300, size(lpathC,1));
 tstart_sampling = tic;
 lpathS = interparc(n, lpathC(:,1), lpathC(:,2), 'spline');
 time_sampling = toc(tstart_sampling);
@@ -99,10 +108,10 @@ tstart_speed = tic;
 lspeedS = zeros(n,1);
 fspeedS = zeros(n,1);
 for k = 1:n
-[~, lidx] = min(vecnorm(lpathC - lpathS(k,:), 2, 2));
-lspeedS(k) = lspeedC(lidx);
-[~, fidx] = min(vecnorm(fpathC - fpathS(k,:), 2, 2));
-fspeedS(k) = fspeedC(fidx);
+    [~, lidx] = min(vecnorm(lpathC - lpathS(k,:), 2, 2));
+    lspeedS(k) = lspeedC(lidx);
+    [~, fidx] = min(vecnorm(fpathC - fpathS(k,:), 2, 2));
+    fspeedS(k) = fspeedC(fidx);
 end
 time_speed = toc(tstart_speed);
 
@@ -121,29 +130,32 @@ if plotit
     % Colors for leader and follower
     lcol = [0, 0.4470, 0.7410];
     fcol = [0.85, 0.325, 0.098];
-    
+
     % Figure 1:  path calculations
     figure('position', [200 200 800 800])
     hold on
-    
+
     % Input leader and follower paths
     hp_l = plot(lpath(:,1),lpath(:,2), 'color', lcol);
     hp_f = plot(fpath(:,1),fpath(:,2), 'color', fcol);
-    
+
     % Clip points (start on follower path, end on leader path)
     hp_s = plot(p_start(1),p_start(2),'o', 'color', fcol, 'markerfacecolor', fcol);
     hp_e = plot(p_end(1),p_end(2),'o', 'color', lcol, 'markerfacecolor', lcol);
-    
+
     % Sampled leader path (equal arclength)
     hp_l2 = plot(lpathS(:,1),lpathS(:,2),'.', 'color', lcol);
 
     % Closest points on follower path
     hp_f2 = plot(fpathS(:,1),fpathS(:,2),'.', 'color', fcol);
-    
+
     % Deviations
-    for i = 1:n
-       plot([lpathS(i,1) fpathS(i,1)], [lpathS(i,2), fpathS(i,2)], 'color', [0.5, 0.5, 0.5], 'linewidth', 0.5) 
-    end
+    % for i = 1:n
+    %    plot([lpathS(i,1) fpathS(i,1)], [lpathS(i,2), fpathS(i,2)], 'color', [0.5, 0.5, 0.5], 'linewidth', 0.5)
+    % end
+
+    p = patch([fpathS(:,1)' fliplr(lpathS(:,1)')], [fpathS(:,2)' fliplr(lpathS(:,2)')], [0.5, 0.5, 0.5])
+    p.FaceAlpha = 0.3
 
     axis equal
     box on
@@ -164,7 +176,7 @@ if plotit
         'Follower path (closest points)' ...
         }, ...
         'location', 'southeast')
-    
+
     % Figure 2: Deviation as function of distance traveled along leader path
     figure
     plot((1:n)*delta, deviation)
@@ -172,7 +184,7 @@ if plotit
     xlabel('Distance along leader path [m]')
     ylabel('Follower path deviation [m]')
     title('Path deviation')
-    
+
     % Figure 3: Vehicle speeds at same locations along leader path
     figure
     plot((1:n)*delta, lspeedS, 'color', lcol)
@@ -182,7 +194,7 @@ if plotit
     ylabel('Vehicle speed [m/s]')
     title('Vehicle speeds at same locations')
     legend('Leader', 'Follower', 'location', 'southeast')
-    
+
     % Figure 4: Speed deviation as function of distance traveled along leader path
     figure
     plot((1:n)*delta, speed_deviation)
@@ -190,5 +202,5 @@ if plotit
     xlabel('Distance along leader path [m]')
     ylabel('Follower speed deviation [m/s]')
     title('Speed deviation')
-   
+
 end

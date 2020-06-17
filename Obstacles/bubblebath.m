@@ -201,9 +201,9 @@ if ~isfield(S,'initCircs') || isempty(S.initCircs)
 end
 
 % input validation
-if S.axisHandle ~= false
-    assert(ishghandle(S.axisHandle,'axes'),'axisHandle must be an axis handle.')
-end
+% if S.axisHandle ~= false
+%     assert(ishghandle(S.axisHandle,'axes'),'axisHandle must be an axis handle.')
+% end
 validateattributes(S.frameSize,{'double'},{'size',[1,2],'>',0},mfilename,'frameSize')
 assert(isnumeric(S.nSizes) && isscalar(S.nSizes) && (isnan(S.nSizes) || mod(S.nSizes,1)==0),...
     'nSizes is expected to be a scalar, nonzero, positive integer or NaN.')
@@ -304,7 +304,7 @@ else
   circdata = []; %[xCenter, yCenter, radius] of each drawn circle
 end
 h = cell(nSizes,1); % handles to the line objects for each circle
-wb = waitbar(0,'initializing...','name',mfilename);
+% wb = waitbar(0,'initializing...','name',mfilename);
 originalWarnState = warning('backtrace');
 warning backtrace off
 for i = 1:nSizes
@@ -333,10 +333,11 @@ for i = 1:nSizes
         cCount = sum(isOK);  %cirlce count for current radius
         iCount = iCount + 1; %iteration count
         % Update waitbar
-        if ishghandle(wb)
-            waitbar(max(iCount/S.maxIt,cCount >= d(i)),wb,sprintf('Trying to find space for up to %d circles with radius = %.2f\nFinal radius: %.2f',d(i),r(i),r(end)));
-        end
+        % if ishghandle(wb)
+        %     waitbar(max(iCount/S.maxIt,cCount >= d(i)),wb,sprintf('Trying to find space for up to %d circles with radius = %.2f\nFinal radius: %.2f',d(i),r(i),r(end)));
+        % end
     end
+
     % If we had to quit searching, throw warning.
     if iCount >= S.maxIt && ~S.supressWarning
         warning('Max iteration reached. %d of the requested %d circles drawn for radius %.3f', cCount, d(i), r(i))
@@ -361,9 +362,9 @@ end
 circHandles = [h{:}]';
 
 % Remove waitbar
-if ishghandle(wb)
-    delete(wb)
-end
+% if ishghandle(wb)
+%     delete(wb)
+% end
 
 if nargout > 0
     % Produce output only when requested
