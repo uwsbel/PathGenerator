@@ -1,8 +1,8 @@
-function [mPath, mSpeed, path_length] = metrics(lfile, ffile, plotit)
+function [mPath, mSpeed, mSpeedRel, path_length] = metrics(lfile, ffile, plotit)
 % Calculate metrics for follower path deviation.
 % Usage:
-%   [avg_dev, max_dev, path_length] = metrics(lfile, ffile)
-%   [avg_dev, max_dev, path_length] = metrics(lfile, ffile, plotit)
+%   [mPath, mSpeed, mSpeedRel, path_length] = metrics(lfile, ffile)
+%   [mPath, mSpeed, mSpeedRel, path_length] = metrics(lfile, ffile, plotit)
 % Inputs:
 %   lfile - filename (csv) with leader's path data
 %   ffile - filename (csv) with follower's path data
@@ -77,7 +77,7 @@ clear fidx lidx
 %%fprintf('leader path length = %f\n', path_length);
 
 % Evaluate the leader path at 'n' equally spaced points in arclength
-n = min(300, size(lpathC,1));
+n = min(200, size(lpathC,1));
 tstart_sampling = tic;
 lpathS = interparc(n, lpathC(:,1), lpathC(:,2), 'spline');
 time_sampling = toc(tstart_sampling);
@@ -115,10 +115,31 @@ for k = 1:n
 end
 time_speed = toc(tstart_speed);
 
-% Calculate speed metrics
+% Note: for speed metric calculations, discard an initial segment of the
+% common path (always a fixed value).  This is because:
+% - experiments atsrt with all vehicles at rest
+% - they all need to accelerate from rest to reach the "convoy speed"
+% - at t=0, the relative speed deviation would involve a division by 0
+% Ideally, the test setup would be modified to collect data between to
+% pre-defined "start" and "end" points on the prescribed path with all
+% followers using PID controllers before reaching the "start" point and
+% then switching to an inference controller.
+buf_length = 10;  % meters
+is = round(buf_length / delta);
+ns = n - is + 1;
+fspeedS = fspeedS(is:end);
+lspeedS = lspeedS(is:end);
+
+
+% Calculate speed metrics (absolute speed deviation)
 speed_deviation = abs(fspeedS - lspeedS);
-mSpeed.avg = sum(speed_deviation) / n;
+mSpeed.avg = sum(speed_deviation) / ns;
 mSpeed.max = max(speed_deviation);
+
+% Calculate speed metrics (absolute speed deviation)
+speed_deviation_rel = speed_deviation ./ abs(lspeedS);
+mSpeedRel.avg = sum(speed_deviation_rel) / ns;
+mSpeedRel.max = max(speed_deviation_rel);
 
 clear lidx fidx
 
@@ -150,12 +171,12 @@ if plotit
     hp_f2 = plot(fpathS(:,1),fpathS(:,2),'.', 'color', fcol);
 
     % Deviations
-    % for i = 1:n
-    %    plot([lpathS(i,1) fpathS(i,1)], [lpathS(i,2), fpathS(i,2)], 'color', [0.5, 0.5, 0.5], 'linewidth', 0.5)
-    % end
+    for i = 1:n
+       plot([lpathS(i,1) fpathS(i,1)], [lpathS(i,2), fpathS(i,2)], 'color', [0.5, 0.5, 0.5], 'linewidth', 0.5)
+    end
 
-    p = patch([fpathS(:,1)' fliplr(lpathS(:,1)')], [fpathS(:,2)' fliplr(lpathS(:,2)')], [0.5, 0.5, 0.5])
-    p.FaceAlpha = 0.3
+    % p = patch([fpathS(:,1)' fliplr(lpathS(:,1)')], [fpathS(:,2)' fliplr(lpathS(:,2)')], [0.5, 0.5, 0.5])
+    % p.FaceAlpha = 0.3
 
     axis equal
     box on
@@ -187,9 +208,9 @@ if plotit
 
     % Figure 3: Vehicle speeds at same locations along leader path
     figure
-    plot((1:n)*delta, lspeedS, 'color', lcol)
+    plot((is:n)*delta, lspeedS, 'color', lcol)
     hold on, grid on, box on
-    plot((1:n)*delta, fspeedS, 'color', fcol)
+    plot((is:n)*delta, fspeedS, 'color', fcol)
     xlabel('Distance along leader path [m]')
     ylabel('Vehicle speed [m/s]')
     title('Vehicle speeds at same locations')
@@ -197,10 +218,17 @@ if plotit
 
     % Figure 4: Speed deviation as function of distance traveled along leader path
     figure
-    plot((1:n)*delta, speed_deviation)
+    plot((is:n)*delta, speed_deviation)
     grid on, box on
     xlabel('Distance along leader path [m]')
     ylabel('Follower speed deviation [m/s]')
     title('Speed deviation')
 
+    % Figure 5: Speed deviation as function of distance traveled along leader path
+    figure
+    plot((is:n)*delta, speed_deviation_rel)
+    grid on, box on
+    xlabel('Distance along leader path [m]')
+    ylabel('Follower speed deviation [-]')
+    title('Relative speed deviation')
 end

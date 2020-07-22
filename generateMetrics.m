@@ -68,7 +68,7 @@ ofile = sprintf('Data/metrics_%s.txt', S.terrain);
 if S.save
     % delete current file
     fopen(ofile, 'w');
-    fprintf(ofile, '#path_idx, rank, path_avg, path_max, speed_avg, speed_max, path_length');
+    fprintf(ofile, '#path_idx, rank, path_avg, path_max, speed_avg, speed_max, rel_speed_avg, rel_speed_max, path_length');
 end
 ofile = fopen(ofile, 'a');
 
@@ -100,7 +100,7 @@ while i < S.max_it
 
         % calculate metrics
         try
-          [mPath, mSpeed, path_length] = metrics(lfile, ffile, S.plot);
+          [mPath, mSpeed, mSpeedRel, path_length] = metrics(lfile, ffile, S.plot);
         catch
           fprintf('Skipping %d.', i);
           continue;
@@ -114,7 +114,7 @@ while i < S.max_it
 
         % save metrics
         if S.save
-            fprintf(ofile, '%d,%d,%f,%f,%f,%f,%f\n', i, follower, mPath.avg, mPath.max, mSpeed.avg, mSpeed.max, path_length);
+            fprintf(ofile, '%d,%d,%f,%f,%f,%f,%f,%f,%f\n', i, follower, mPath.avg, mPath.max, mSpeed.avg, mSpeed.max, mSpeedRel.avg, mSpeedRel.max, path_length);
         end
     end
 end
