@@ -157,35 +157,23 @@ if plotit
     hold on
 
     % Input leader and follower paths
-    hp_l = plot(lpath(:,1),lpath(:,2), 'color', lcol);
-    hp_f = plot(fpath(:,1),fpath(:,2), 'color', fcol);
+    hp_l = plot(lpath(:,1),lpath(:,2), 'color', lcol, 'linewidth', 1);
+    hp_f = plot(fpath(:,1),fpath(:,2), 'color', fcol, 'linewidth', 1);
 
     % Clip points (start on follower path, end on leader path)
-    hp_s = plot(p_start(1),p_start(2),'o', 'color', fcol, 'markerfacecolor', fcol);
-    hp_e = plot(p_end(1),p_end(2),'o', 'color', lcol, 'markerfacecolor', lcol);
+    hp_s = plot(p_start(1),p_start(2),'s', 'markersize', 8, 'color', fcol, 'markerfacecolor', fcol);
+    hp_e = plot(p_end(1),p_end(2),'s', 'markersize', 8, 'color', lcol, 'markerfacecolor', lcol);
 
     % Sampled leader path (equal arclength)
-    hp_l2 = plot(lpathS(:,1),lpathS(:,2),'.', 'color', lcol);
+    hp_l2 = plot(lpathS(:,1),lpathS(:,2),'o', 'markersize', 2, 'color', lcol, 'markerfacecolor', lcol);
 
     % Closest points on follower path
-    hp_f2 = plot(fpathS(:,1),fpathS(:,2),'.', 'color', fcol);
+    hp_f2 = plot(fpathS(:,1),fpathS(:,2),'o', 'markersize', 2, 'color', fcol, 'markerfacecolor', fcol);
 
     % Deviations
     for i = 1:n
        plot([lpathS(i,1) fpathS(i,1)], [lpathS(i,2), fpathS(i,2)], 'color', [0.5, 0.5, 0.5], 'linewidth', 0.5)
     end
-
-    % p = patch([fpathS(:,1)' fliplr(lpathS(:,1)')], [fpathS(:,2)' fliplr(lpathS(:,2)')], [0.5, 0.5, 0.5])
-    % p.FaceAlpha = 0.3
-
-    axis equal
-    box on
-    grid on
-    xlim([-50 50])
-    ylim([-50 50])
-    xticks(-50:25:50)
-    yticks(-50:25:50)
-    title('Vehicle paths')
 
     legend([hp_l hp_f hp_s hp_e hp_l2 hp_f2], ...
         { ...
@@ -198,37 +186,59 @@ if plotit
         }, ...
         'location', 'southeast')
 
+    axis equal
+    box on
+    grid on
+    xlim([-50 50])
+    ylim([-50 50])
+    xticks(-40:20:40)
+    yticks(-40:20:40)
+    xlabel('X [m]')
+    ylabel('Y [m]')
+    %title('Vehicle paths')
+    set(gca, 'LineWidth', 1, 'FontSize', 20)
+    tightfig
+
     % Figure 2: Deviation as function of distance traveled along leader path
     figure
-    plot((1:n)*delta, deviation)
+    plot((1:n)*delta, deviation, 'color', [0.6, 0.6, 0.6], 'linewidth', 1)
     grid on, box on
     xlabel('Distance along leader path [m]')
     ylabel('Follower path deviation [m]')
-    title('Path deviation')
+    %title('Path deviation')
+    set(gca, 'LineWidth', 1, 'FontSize', 14)
+    tightfig
 
-    % Figure 3: Vehicle speeds at same locations along leader path
-    figure
-    plot((is:n)*delta, lspeedS, 'color', lcol)
+
+    % Figure 3: vehicle speed at same locations along leader path
+    %           and speed deviations (absolute and relative)
+    figure('position', [300 200 1200 300])
+
+    subplot(1,3,1)
+    plot((is:n)*delta, lspeedS, 'color', lcol, 'linewidth', 1)
     hold on, grid on, box on
-    plot((is:n)*delta, fspeedS, 'color', fcol)
+    plot((is:n)*delta, fspeedS, 'color', fcol, 'linewidth', 1)
     xlabel('Distance along leader path [m]')
     ylabel('Vehicle speed [m/s]')
-    title('Vehicle speeds at same locations')
+    %title('Vehicle speeds at same locations')
     legend('Leader', 'Follower', 'location', 'southeast')
+    set(gca, 'LineWidth', 1, 'FontSize', 14)
 
-    % Figure 4: Speed deviation as function of distance traveled along leader path
-    figure
-    plot((is:n)*delta, speed_deviation)
+    subplot(1,3,2)
+    plot((is:n)*delta, speed_deviation, 'color', [0.6, 0.6, 0.6], 'linewidth', 1)
     grid on, box on
     xlabel('Distance along leader path [m]')
-    ylabel('Follower speed deviation [m/s]')
-    title('Speed deviation')
+    ylabel('Speed deviation [m/s]')
+    %title('Speed deviation')
+    set(gca, 'LineWidth', 1, 'FontSize', 14)
 
-    % Figure 5: Speed deviation as function of distance traveled along leader path
-    figure
-    plot((is:n)*delta, speed_deviation_rel)
+    subplot(1,3,3)
+    plot((is:n)*delta, 100 * speed_deviation_rel, 'color', [0.6, 0.6, 0.6], 'linewidth', 1)
     grid on, box on
-    xlabel('Distance along leader path [m]')
-    ylabel('Follower speed deviation [-]')
-    title('Relative speed deviation')
+    xlabel('Distance along leader path [m]  ')
+    ylabel('Relative speed deviation [%]')
+    %title('Relative speed deviation')
+    set(gca, 'LineWidth', 1, 'FontSize', 14)
+
+    tightfig
 end
