@@ -13,11 +13,11 @@ B3 = t.^3;
 figure
 hold on
 
-folder = 'Data/Paths/';
+folder = 'Data/RobotLearningPaths/7/';
 pathfiles = dir(sprintf('%spath_*.dat', folder));
 if nargin ~= 1 || idxs == -1
   idxs = 1:length(pathfiles);
-  idxs = 1:128;
+  % idxs = 1:128;
 end
 for f = idxs
     % cla
@@ -28,7 +28,7 @@ for f = idxs
       data = readBezier(sprintf('%s%s', folder, pathfiles(f).name));
       fprintf('File: %s\n', pathfiles(f).name)
     end
-    
+
     for i = 1:data.n-1
         X = B0 * data.p(i,1) + B1 * data.out(i,1) + B2 * data.in(i+1,1) + B3 * data.p(i+1,1);
         Y = B0 * data.p(i,2) + B1 * data.out(i,2) + B2 * data.in(i+1,2) + B3 * data.p(i+1,2);

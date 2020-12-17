@@ -47,8 +47,8 @@ function sol2=ParseSolution(sol1,model)
     end
 
     IsFeasible=(Violation==0 ...
-                & isempty(xx(xx > 47 | xx < -47)) ...
-                & isempty(yy(yy > 47 | yy < -47)));
+                & isempty(xx(xx > 37 | xx < -37)) ...
+                & isempty(yy(yy > 37 | yy < -37)));
 
     sol2.TS=TS;
     sol2.XS=XS;

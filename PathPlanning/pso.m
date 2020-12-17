@@ -1,4 +1,4 @@
-function [sol, model] = pso(verbose)
+function [sol, model] = pso(model, verbose)
 
 
 % Copyright (c) 2015, Yarpiz (www.yarpiz.com)
@@ -15,8 +15,6 @@ function [sol, model] = pso(verbose)
 
 
 %% Problem Definition
-
-model=CreateModel(verbose);
 
 % model.n=5;  % number of Handle Points
 

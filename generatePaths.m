@@ -1,5 +1,5 @@
 
-num_trials = 750;
+num_trials = 200;
 verbose = false;
 render = false;
 save = true;
@@ -22,7 +22,12 @@ for it = 1:num_trials
     % Generate optimal path for random obstacles
     fprintf('Trial %d... ', it);
     tstart = tic;
-    [sol, model] = pso(verbose);
+
+    obs.load = 1;
+    obs.filename = sprintf('Data/Obstacles/3/obs%d.txt', it);
+    model=CreateModel(obs, verbose);
+
+    [sol, model] = pso(model, verbose);
     feasible = sol.IsFeasible;
     points = [sol.XS' sol.YS'];
     obst = [model.xobs' model.yobs' model.robs'];
@@ -51,13 +56,13 @@ for it = 1:num_trials
 
     % TODO:  a more precise feasability test?
 
-    if ~feasible
-        continue;
-    end
+    % if ~feasible
+    %     continue;
+    % end
 
     if save
         % Write files for this trial
-        folder = "Data/Paths/";
+        folder = 'Data/RobotLearningPaths/3/';
         while isfile(sprintf('%spath_%d.dat', folder, idx))
             idx = idx + 1;
         end
@@ -78,6 +83,11 @@ for it = 1:num_trials
 
         % Bezier curve
         writeBezier(data, sprintf('%spath_%d.dat', folder, idx));
+
+        if ~feasible
+          f = fopen(sprintf('%sfail_%d.dat', folder, idx), 'w');
+          fclose(f);
+        end
 
         fprintf('Figure #%d saved.\n', idx);
     end
